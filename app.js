@@ -2,6 +2,7 @@ var total_data=[];
 
 function show(country){
 		//spinner show
+		$('html, body').animate({scrollTop:0}, 'slow');
 		var vv= document.getElementById("myChart").getAttribute("height");
  		//console.log(vv+"px");
  		vv=vv+"px";
