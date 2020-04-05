@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+	<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.min.js"></script>!-->
+	<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+	
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	
+
+	<style>
+		.table_row,th{
+			cursor: pointer;
+		}
+		
+.tableFixHead thead th { position: sticky; top: 0; }
+
+
+/*table  { border-collapse: collapse; width: 100%; }*/
+/*th, td { margin: 8px 16px; }*/
+th {color:white;background-color:rgba(0,0,0,0.6);z-index:100000;}
+
+/*.table-striped > tbody > tr:nth-child(odd) > td, .table-striped > tbody > tr:nth-child(odd) > th {
+   background-color: white;
+}
+
+.table-striped > tbody > tr:nth-child(even) > td, .table-striped > tbody > tr:nth-child(even) > th {
+   background-color: #E6F3F9;
+}*/
+.table-bordered td {border: none !important;}
+.table-bordered th {border: none !important;}
+
+/*td {
+    border: solid 1px transparent;
+    border-style: solid none;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}*/
+.table_row{
+	
+	background-color: #f7f7f7;
+	color: #808080;
+	
+	
+}
+
+
+.table_row:hover{
+	background-color:#EBEBEB;
+	/*box-shadow: 0 0px 40px 0px rgba(0, 0, 0, 0.15);*/
+}
+table {
+    border-collapse: separate !important;
+    border-spacing: 0 10px;
+    border:none !important;
+    
+
+}
+/*tr{
+	margin-bottom: 5em !important;
+}*/
+
+.fa-sort{
+	font-size: 13px;
+}
+
+
+
+
+
+
+	</style>
+
+</head>
+<body>
+
+	
+
+<!--d-none d-sm-table-cell!-->
+	
+	<div class="container">
+		
+		
+
+		<div class="wrapper">
+		<div id="spinner1" style="box-shadow: rgba(0, 0, 0, 0.15) 0px 0px 40px 0px;height: 345px;position: relative;
+		display:none" class="pb-4 text-center">
+			<i class="fa fa-spinner fa-spin" style="position: absolute;top:50%;font-size: 50px;"></i>
+		</div>
+		<canvas id="myChart" style="box-shadow: 0 0px 40px 0px rgba(0, 0, 0, 0.15);display: none;" class="pb-4"></canvas>
+	</div>
+		<div class="row mt-2">
+			<div class="col-md-12 tableFixHead" style="">
+		
+	<table class="table table-bordered table-fixed" style="box-shadow: 0 0px 40px 0px rgba(0, 0, 0, 0.15);display:none;"> <!--table-striped table-bordered!-->
+  	<thead>
+    <tr class="head_row">
+      <th  data-column="country" data-order="desc" style="">Country <i class="fa fa-sort"></i></th>
+      <th  data-column="new_cases" data-order="desc" class="">New Cases <i class="fa fa-sort"></i></th>
+      <th  data-column="active" data-order="desc" class="" >Active <i class="fa fa-sort"></i></th>
+      <th  data-column="critical" data-order="desc" class="">Critical <i class="fa fa-sort"></i></th>
+      <th  data-column="recovered" data-order="desc">Recovered <i class="fa fa-sort"></i></th>
+      <th  data-column="total_cases" data-order="desc">Total Cases <i class="fa fa-sort"></i></th>
+      <th  data-column="new_deaths" data-order="desc" class="">New Deaths <i class="fa fa-sort"></i></th>
+      <th  data-column="total_deaths" data-order="desc">Total Deaths <i class="fa fa-sort"></i></th>
+	</tr>
+  </thead>
+  <tbody class="table_body">
+  </tbody>
+</table>
+
+			
+
+			</div>
+			
+		</div>
+		
+	</div>
+
+<!--new !-->
+
+
+
+
+
+
+
+
+<!--new end !-->
+
+
+	
+	<script>
+		let massPopChart;
+		function fchart(data){
+
+
+
+
+
+
+			var arr=[];
+	arr=data.response;
+
+	var active=[];
+	var timer=[];
+	for(let i=0;i<arr.length;i++){
+	active.push(arr[i].cases.total);
+	timer.push(arr[i].time);
+	}
+	active.reverse();
+	timer.reverse()
+
+
+
+			let draw = Chart.controllers.line.prototype.draw;
+Chart.controllers.line = Chart.controllers.line.extend({
+    draw: function() {
+        draw.apply(this, arguments);
+        let ctx = this.chart.chart.ctx;
+        let _stroke = ctx.stroke;
+        ctx.stroke = function() {
+            ctx.save();
+            ctx.shadowColor = "#000"//'rgba(5, 141, 199, 0.2)';   //#E6F3F9  //#E56590
+            ctx.shadowBlur = 10;
+            ctx.shadowOffsetX = 8;
+            ctx.shadowOffsetY = 8;
+            _stroke.apply(this, arguments)
+            ctx.restore();
+        }
+    }
+});
+
+
+
+		  let myChart = document.getElementById('myChart').getContext('2d');
+
+    // Global Options
+    Chart.defaults.global.defaultFontFamily = 'Lato';
+    Chart.defaults.global.defaultFontSize = 18;
+    Chart.defaults.global.defaultFontColor = '#777';
+
+    massPopChart = new Chart(myChart, {
+      type:'line', // bar, horizontalBar, pie, line, doughnut, radar, polarArea
+      data:{
+        labels:timer,
+        datasets:[{
+          label:'Total Cases',
+          data:active,
+          
+
+          fill: false,
+          //borderWidth:1,
+                /*backgroundColor: "rgba(5, 141, 199, 0.1)",
+                borderColor: "#058dc7",
+                pointBorderColor: "#058dc7",
+                pointBackgroundColor: "#058dc7",
+                pointHoverRadius: 5,
+                pointHoverBackgroundColor: "#ffffff",
+                pointHoverBorderColor: "#058dc7",
+                pointBorderWidth: 2*/
+                /*borderColor: '#ffb88c',
+            pointBackgroundColor: "#fff",
+            pointBorderColor: "#ffb88c",
+            pointHoverBackgroundColor: "#ffb88c",
+            pointHoverBorderColor: "#fff",
+            pointRadius: 4,
+            pointHoverRadius: 4,
+            fill: false*/
+
+            	fillColor: "rgba(255, 99, 132, 0.2)",
+      strokeColor: "rgba(54, 162, 235, 0.2)",
+      pointColor: "rgba(255, 206, 86, 0.2)",
+      pointStrokeColor: "#fff",
+      pointHighlightFill: "#fff",
+      pointHighlightStroke: "rgba(75, 192, 192, 0.2)"
+
+
+        }]
+      },
+      options:{
+        title:{
+          display:true,
+          text:'Global',
+          fontSize:25
+        },
+        
+        legend:{
+          display:true,
+          position:'right',
+          labels:{
+            fontColor:'#000'
+          }
+        },
+        layout:{
+          padding:{
+            left:50,
+            right:0,
+            bottom:0,
+            top:0
+          }
+        },
+        tooltips:{
+          enabled:true,
+
+        },
+        scales: {
+        xAxes: [{
+            //gridLines: {
+              //  display:false
+            //}
+            display:false
+        }],
+        yAxes: [{
+            gridLines: {
+                display:false
+            }   
+        }]
+      },
+
+      	hover: {
+      onHover: function(e) {
+         var point = this.getElementAtEvent(e);
+         if (point.length) e.target.style.cursor = 'pointer';
+         else e.target.style.cursor = 'default';
+      }
+   }
+
+      }
+    });
+
+
+
+
+}
+	</script>
+
+		
+
+<script src="app.js"></script>
+</body>
+</html>
