@@ -2,6 +2,7 @@ var total_data=[];
 
 function show(country){
 		//spinner show
+		// $(window).scrollTop(0);
 		$('html, body').animate({scrollTop:0}, 'slow');
 		var vv= document.getElementById("myChart").getAttribute("height");
  		//console.log(vv+"px");
@@ -44,11 +45,10 @@ const merge = () => {
 		var list=`<tr class="table_row" onclick="show('${country}')">
       <td class="country point">${country}</td>
       <td class="point">${new_cases}</td>
-      <td class="point">${active}</td>
-      <td class="point">${critical}</td>
+      
       <td class="point">${recovered}</td>
       <td class="point">${total_cases}</td>
-      <td class="point">${new_deaths}</td>
+      
       <td class="point">${total_deaths}</td>
     </tr>`
 
@@ -70,14 +70,25 @@ function graph(data,country){
 var arr=[];
 arr=data.response;
 
+console.log(arr);
+
 var active=[];
 var timer=[];
-for(let i=arr.length-1;i>=0;i--){
-	active.push(arr[i].cases.total);
-	timer.push(arr[i].time);
-}
 
-if(country==="World")
+let map = new Map();
+for(let i=0;i<arr.length;i++){
+	//active.push(arr[i].cases.total);
+	//timer.push(arr[i].time);
+	if(!map.has(arr[i].day)){
+		map.set(arr[i].day,arr[i].cases.total);
+		active.push(arr[i].cases.total);
+		timer.push(arr[i].day);
+	}
+}
+active.reverse();
+timer.reverse();
+
+if(country==="World" || country==="All")
 	country="Global";
 
     massPopChart.data.datasets[0].data=active;
@@ -106,7 +117,7 @@ function getData(data){
 for(let i=0;i<arr.length;i++){
 
 		let country=arr[i].country;
-		if(country=="All")
+		if(country=="World")
 			continue;
 		let new_cases=arr[i].cases.new;
 		let active=arr[i].cases.active;
@@ -126,11 +137,8 @@ for(let i=0;i<arr.length;i++){
 		var list=`<tr class="table_row" onclick="show('${country}')">
       <td class="country point">${country}</td>
       <td class="point">${new_cases}</td>
-      <td class="point">${active}</td>
-      <td class="point">${critical}</td>
       <td class="point">${recovered}</td>
       <td class="point">${total_cases}</td>
-      <td class="point">${new_deaths}</td>
       <td class="point">${total_deaths}</td>
     </tr>`
 
@@ -139,12 +147,39 @@ for(let i=0;i<arr.length;i++){
 
 
 	}
-	console.log(document.querySelector('.table-fixed'));
+	//console.log(document.querySelector('.table-fixed'));
 	document.querySelector('.table-fixed').style.display="table";
 	//console.log(total_data);
 	
 
+   // $('#table_id').DataTable();
 
+   
+    oTable = $('#table_id').DataTable({
+    	responsive: true,
+    	//sDom: 'lrtip'
+    	"order": [[ 4, "desc" ]],
+    	"oLanguage": { "sSearch": "" } 
+    });
+   // console.log($("label"));
+
+  
+
+    document.getElementsByTagName("INPUT")[0].classList.add("form-control");
+   document.getElementsByTagName("INPUT")[0].classList.add("form-control-sm");
+   document.getElementsByTagName("INPUT")[0].setAttribute("placeholder", "Search...");
+
+    //var $label = document.getElementsByTagName("INPUT")[0].closest("label");
+//$label.replaceWith(document.getElementsByTagName("INPUT")[0]);
+//console.log(document.getElementsByTagName("INPUT")[0]);
+/*oTable.columns().iterator( 'column', function (ctx, idx) {
+    $( oTable.column(idx).header() ).append('<span class="sort-icon"/>');
+  } );*/
+
+    $('#myInput').keyup(function(){
+      oTable.search($(this).val()).draw();
+});
+   
 }
 
 
@@ -161,7 +196,7 @@ async function c(){
 	}
 });
 	const x = await p.json();
-	console.log(x);
+	//console.log(x);
 	getData(x);
 	
 
@@ -187,7 +222,7 @@ async function c(){
 
 
 
-	$('th').on('click', function(){
+	/*$('th').on('click', function(){
 		
 		
 		var column = $(this).data('column');
@@ -215,7 +250,7 @@ async function c(){
 		
 		merge();
 		
-	})
+	})*/
 
 
 }
@@ -228,7 +263,7 @@ async function first(){
 	xx.style.display="block";
 	//console.log(6);
 	//xx.style.display="block";
-	const p = await fetch(`https://covid-193.p.rapidapi.com/history?country=World`, {
+	const p = await fetch(`https://covid-193.p.rapidapi.com/history?country=All`, {
 	"method": "GET",
 	"headers": {
 		"x-rapidapi-host": "covid-193.p.rapidapi.com",
@@ -249,7 +284,7 @@ async function first(){
  //var vv= document.getElementById("myChart");
  //console.log(vv); 
 
-first("World");
+first("All");
 
 
 
@@ -264,11 +299,32 @@ async function history(country){
 	}
 });
 	const x = await p.json();
-	console.log(x);
+	//console.log(x);
 	graph(x,country);
 	
 }
 
 
 
+$(document).ready(function(){
+  $("#myInput").on("keyup", function() {
+
+
+            /*scrollTop =  
+              window.pageYOffset || document.documentElement.scrollTop; 
+            scrollLeft =  
+              window.pageXOffset || document.documentElement.scrollLeft, 
+  
+                
+                window.onscroll = function() { 
+                    window.scrollTo(scrollLeft, scrollTop); 
+                }; */
+
+
+    var value = $(this).val().toLowerCase();
+    $("#myTable tr").filter(function() {
+      $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+    });
+  });
+});
 
